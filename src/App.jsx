@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { createUser, sendMessage, fetchMessages } from "./api";
+import { sendMessage, fetchMessages } from "./api";
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -7,6 +7,7 @@ function App() {
   const [content, setContent] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     loadMessages();
@@ -15,11 +16,6 @@ function App() {
   const loadMessages = async () => {
     const msgs = await fetchMessages();
     setMessages(msgs);
-  };
-
-  const handleUserLogin = async () => {
-    const newUser = await createUser("john", "john@example.com");
-    setUser(newUser);
   };
 
   const handleSendMessage = async () => {
@@ -34,29 +30,64 @@ function App() {
       <h1>Chat App</h1>
       {!user ? (
         <div>
-          <h2>Login / Signup</h2>
-          <input
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <button onClick={async () => {
-            const res = await fetch("http://localhost:4567/login", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ username, email }),
-            });
-            const data = await res.json();
-            if (res.ok) setUser(data);
-            else alert(data.error || "Login failed");
-          }}>
-            Login / Sign Up
-          </button>
+          <div>
+            <h2>Login</h2>
+            <input
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              placeholder="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button onClick={async () => {
+              const res = await fetch("http://localhost:4567/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+              });
+              const data = await res.json();
+              if (res.ok) setUser(data);
+              else alert(data.error || "Login failed");
+            }}>
+              Login
+            </button>
+          </div>
+          <hr/>
+          <div>
+            <h2>Signup</h2>
+            <input
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <input
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              placeholder="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button onClick={async () => {
+              const res = await fetch("http://localhost:4567/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email, password }),
+              });
+              const data = await res.json();
+              if (res.ok) setUser(data);
+              else alert(data.error || "Signup failed");
+            }}>
+              Sign Up
+            </button>
+          </div>
         </div>
       ) : (
         <>
