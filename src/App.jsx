@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import LoginForm from "./components/LoginForm";
 import SignupForm from "./components/SignupForm";
 import ChatBox from "./components/ChatBox";
@@ -6,6 +6,27 @@ import ChatBox from "./components/ChatBox";
 function App() {
   const [user, setUser] = useState(null);
   const [showLogin, setShowLogin] = useState(true);
+
+  // Load user from localStorage
+  useEffect(() => {
+    const savedUser = localStorage.getItem("chatUser");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  // Save user to localStorage when it changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("chatUser", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("chatUser");
+    }
+  }, [user]);
+
+  const handleLogout = () => {
+    setUser(null);
+  };
 
   if (!user) {
     return (
@@ -24,7 +45,12 @@ function App() {
     );
   }
 
-  return <ChatBox user={user} />;
+  return (
+    <div>
+      <button onClick={handleLogout}>Logout</button>
+      <ChatBox user={user} />
+    </div>
+  );
 }
 
 export default App;
