@@ -5,6 +5,8 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [user, setUser] = useState(null);
   const [content, setContent] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     loadMessages();
@@ -31,9 +33,35 @@ function App() {
     <div>
       <h1>Chat App</h1>
       {!user ? (
-        <button onClick={handleUserLogin}>Login as John</button>
+        <div>
+          <h2>Login / Signup</h2>
+          <input
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <input
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <button onClick={async () => {
+            const res = await fetch("http://localhost:4567/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username, email }),
+            });
+            const data = await res.json();
+            if (res.ok) setUser(data);
+            else alert(data.error || "Login failed");
+          }}>
+            Login / Sign Up
+          </button>
+        </div>
       ) : (
         <>
+          <h2>Welcome, {user.username}!</h2>
+          <h3>Messages</h3>
           <div>
             {messages.map((msg) => (
               <p key={msg.id}>
