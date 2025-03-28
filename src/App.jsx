@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect, useState } from "react";
+import { createUser, sendMessage, fetchMessages } from "./api";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [messages, setMessages] = useState([]);
+  const [user, setUser] = useState(null);
+  const [content, setContent] = useState("");
+
+  useEffect(() => {
+    loadMessages();
+  }, []);
+
+  const loadMessages = async () => {
+    const msgs = await fetchMessages();
+    setMessages(msgs);
+  };
+
+  const handleUserLogin = async () => {
+    const newUser = await createUser("john", "john@example.com");
+    setUser(newUser);
+  };
+
+  const handleSendMessage = async () => {
+    if (!content || !user) return;
+    await sendMessage(user.id, content);
+    setContent("");
+    loadMessages();
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <h1>Chat App</h1>
+      {!user ? (
+        <button onClick={handleUserLogin}>Login as John</button>
+      ) : (
+        <>
+          <div>
+            {messages.map((msg) => (
+              <p key={msg.id}>
+                <strong>{msg.user.username}:</strong> {msg.content}
+              </p>
+            ))}
+          </div>
+          <input
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Type a message"
+          />
+          <button onClick={handleSendMessage}>Send</button>
+        </>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
