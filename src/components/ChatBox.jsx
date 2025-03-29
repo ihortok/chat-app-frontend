@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { fetchMessages, sendMessage } from "../api";
+import { formatTimestamp } from "../utils/date";
 
 const ChatBox = ({ user }) => {
   const [messages, setMessages] = useState([]);
   const [content, setContent] = useState("");
   const wsRef = useRef(null);
+  const bottomRef = useRef(null);
 
   // Load existing messages on mount
   useEffect(() => {
@@ -35,22 +37,58 @@ const ChatBox = ({ user }) => {
     return () => socket.close();
   }, []);
 
+  useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
   const handleSend = async () => {
     if (content.trim()) {
       await sendMessage(user.id, content);
       setContent("");
     }
-  };
+  };  
 
   return (
     <div>
       <h2>Welcome, {user.username}!</h2>
-      <div>
+      <div style={{ display: "flex", flexDirection: "column", maxHeight: "500px", overflowY: "auto" }}>
         {messages.map((msg) => (
-          <p key={msg.id}>
-            <strong>{msg.user.username}:</strong> {msg.content}
-          </p>
+          <div
+            style={{
+              alignSelf: msg.user.id === user.id ? "flex-end" : "flex-start",
+              maxWidth: "70%",
+              display: "flex",
+              flexDirection: "column"
+            }}
+            key={msg.id}
+          >
+            <div
+              style={{
+                backgroundColor: msg.user.id === user.id ? "#DCF8C6" : "#eee",
+                padding: "8px 12px",
+                margin: "6px 0",
+                borderRadius: "10px",
+                color: "#000"
+              }}
+            >
+              <strong>{msg.user.username}</strong>
+              <div>{msg.content}</div>
+            </div>
+            <p
+              style={{
+                fontSize: "0.8em",
+                color: "#666",
+                marginTop: "4px",
+                alignSelf: msg.user.id === user.id ? "flex-end" : "flex-start"
+              }}
+            >
+              {formatTimestamp(msg.created_at)}
+            </p>
+          </div>
         ))}
+        <div ref={bottomRef} />
       </div>
       <input
         value={content}
